@@ -1,0 +1,70 @@
+\documentclass[11pt]{book}
+
+\usepackage[brazilian]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[acronym]{glossaries}
+    
+\makeglossaries
+
+\begin{document}
+
+\title{Exposente de Hurst}
+\author{Renato Pereira de Aquino}
+\date{2018-03-16}
+\maketitle
+\tableofcontents
+
+\chapter{Origem}
+
+O expoente de Hurst ou coeficiente de Hurst é utilizado como uma medida de memória histórica de uma série temporal. É relacionado às autocorrelações de uma série temporal e a taxa na qual a mesma decai quando o atraso entre pares de valores aumenta. 
+
+Estudos com o coeficiente de Hurst são originários da hidrologia e foram inicialmente desenvolvidos como uma forma prática de determinar o tamanho ideal de uma represa para as condições volateis de chuva e secas do rio Nilo. O nome expoente ou coeficiente de Hurst, assim como a notação $ H $, é uma homenagem a Harold Edwin Hurst, pesquisador chefe destes estudos\cite{hurst}.
+
+Na geometria fractal, o expoente generalizado de Hurst é denotada $ H $ ou $ H_q $ em homenagem a Harold Edwin Hurst e Ludwig Otto Hölder por Benoît Mandelbrot\cite{mandelbrot}. $ H $ é diretamente relacionado à dimensão fractal e é uma medida da "agressividade" ou "mansidão" da aleatoriedade da série de dados.
+
+
+\chapter{Racional}
+
+O expoente de Hurst é denominado o "indice de dependência" ou o "indice de dependência histórica". Ele quantifica a tendência relativa de uma série temporal a regredir fortemente à média ou agrupar em uma direção. 
+
+O valor de $H$ de 0.5 à 1 indica uma série temporal com relação histórica positiva, significando que um valor alto será provavelmente seguido por outro valor alto e um valor baixo será provavelmente seguido por outro valor baixo. 
+
+Um valor entre 0 e 0.5 indica uma série temporal com relação histórica alternada entre valores altos e baixos, ou seja, um valor alto provavelmente será seguido por um valor baixo e o valor após este provavelmente será alto. 
+
+Um valor $H=0.5$ pode indicar uma série histórica completamente não correlacionada, ou seja, aleatória.
+
+\chapter{Definição}
+
+O expoente de Hurst, $H$, é definido em termos do comportamento asintótico do período reescalado  como uma função do período de tempo de uma série histórica como segue\cite{Qian}\cite{feders}:
+
+\[
+    E[\frac{R(n)}{S(n)}] = Cn^H \text{para } n\to\infty
+\]
+
+Onde:
+
+\begin{itemize}
+    \item $R(n)$ é o período dos primeiros $n$ valores e $S(n)$ é seu desvio padrão.
+    \item $E[x]$ é o valor esperado.
+    \item $n$ é o período da observação (número de dados na série temporal)
+    \item $C$ é uma constante.
+\end{itemize}
+
+\subsection{Analise de período reescalado $R/S$}
+
+Para estimar o expoente de Hurst, estimamos primeiramente a dependência do período reescalado em relação ao período $n$ da observação\cite{feders}. A série temporal de total $N$ é dividida em séries menores de tamanho $n=N$, $N/2$, $N/4$, ... e calculamos a média do período reescalado para cada valor de $n$. Para a série temporal de tamanho $n$, $X=X1$,$X2$,...,$X_n$, o valor reescalado é calculado da seguinte maneira:
+
+\begin{itemize}
+    \item Calcule a média: $$m=\frac{1}{n}  \sum_{i=1}^{n} X_i$$.
+    \item Crie uma série ajustada pela média: $$Y_t = X_t - m \text{ para }  t=1,2,...,n$$
+    \item Calcule a série de desvio acumulado Z: $$Z_t = \sum_{i=1}^{t}Y_i \text{ para }  t=1,2,...,n$$ 
+    \item Calcule o período $R$: $$ R(n) = max(Z_1,Z_2,...,Z_n) - min(Z_1,Z_2,...,Z_n)$$ 
+    \item Calcular o desvio padrão da série S: $$S(n) = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (Xi - m)^2}$$
+    \item Calcular o período reescalado $\frac{R(n)}{S(n)}$ e tirar a média de todas as séries temporais do tamanho $n$
+\end{itemize}
+
+\bibliographystyle{unsrt}
+\bibliography{doc}
+
+\end{document}
