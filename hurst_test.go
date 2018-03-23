@@ -8,97 +8,6 @@ import (
 	"gonum.org/v1/gonum/stat"
 )
 
-// func TestSplit(t *testing.T) {
-// 	l := make([]float64, 256)
-// 	for i := 0; i < 256; i++ {
-// 		l[i] = rand.Float64()
-// 	}
-// 	j, err := Split(l, 128)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	if len(j) != 128 {
-// 		t.Fatalf("Expecting 128 parts, got %d", len(j))
-// 	}
-
-// 	h := make([]float64, 11)
-// 	for i := 0; i < 11; i++ {
-// 		h[i] = rand.Float64()
-// 	}
-// 	m, err := Split(h, 2)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	if len(m) != 2 {
-// 		t.Fatalf("Expecting 2 parts, got %d", len(m))
-// 	}
-// 	if len(m[0]) != 6 {
-// 		t.Fatalf("Expecting 6 elements, got %d", len(m[0]))
-// 	}
-// 	if len(m[1]) != 5 {
-// 		t.Fatalf("Expecting 5 elements, got %d", len(m[1]))
-// 	}
-
-// 	m, err = Split(h, 12)
-// 	if err == nil {
-// 		t.Fatal("Expecting a split length error, got nothing")
-// 	}
-
-// 	h = make([]float64, 10)
-// 	for i := 0; i < 10; i++ {
-// 		h[i] = rand.Float64()
-// 	}
-// 	m, err = Split(h, 4)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	if len(m) != 4 {
-// 		t.Fatalf("Expecting 4 parts, got %d", len(m))
-// 	}
-// 	if len(m[0]) != 3 {
-// 		t.Fatalf("Expecting 3 elements, got %d", len(m[0]))
-// 	}
-// 	if len(m[1]) != 3 {
-// 		t.Fatalf("Expecting 3 elements, got %d", len(m[1]))
-// 	}
-// 	if len(m[2]) != 3 {
-// 		t.Fatalf("Expecting 3 elements, got %d", len(m[2]))
-// 	}
-// 	if len(m[3]) != 1 {
-// 		t.Fatalf("Expecting 1 elements, got %d", len(m[3]))
-// 	}
-
-// }
-
-// func TestPartition(t *testing.T) {
-// 	l := make([]float64, 256)
-// 	for i := 0; i < 256; i++ {
-// 		l[i] = rand.Float64()
-// 	}
-// 	h, err := Partition(l)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-// 	if len(h) != 128 {
-// 		t.Fatalf("Expecting 128 groups, got %d", len(h))
-// 	}
-// 	if len(h[0]) != 1 {
-// 		t.Fatalf("Expecting 1 groups on the first division, got %d", len(h[0]))
-// 	}
-// 	if len(h[1]) != 2 {
-// 		t.Fatalf("Expecting 2 groups on the second division, got %d", len(h[1]))
-// 	}
-// 	if len(h[127]) != 128 {
-// 		t.Fatalf("Expecting 128 groups on the second division, got %d", len(h[127]))
-// 	}
-
-// 	h, err = Partition(brown)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
-
-// }
-
 func TestDeviations(t *testing.T) {
 	values := []float64{2.0, 6.0, 4.0, 8.0}
 	mean, _ := stat.MeanStdDev(values, nil)
@@ -109,11 +18,6 @@ func TestDeviations(t *testing.T) {
 	if floats.Min(deviations) != -3.0 {
 		t.Fatalf("Expecting Min(deviations) = -3, got %f\n", floats.Min(deviations))
 	}
-
-	// fmt.Fprintf(os.Stderr, "Max(deviations)-Min(deviations) %f / StdDev %f\n", (floats.Max(deviations) - floats.Min(deviations)), stddev)
-	// rs := (floats.Max(deviations) - floats.Min(deviations)) / stddev
-	// fmt.Fprintf(os.Stderr, "%f\n", rs)
-	// fmt.Fprintf(os.Stderr, "Log2(%f) = %f\n", rs, math.Log2(rs))
 }
 
 func TestRange(t *testing.T) {
@@ -129,7 +33,7 @@ func TestHurst(t *testing.T) {
 	for i := 0; i < 100000; i++ {
 		upseries[i] = float64(i)
 	}
-	h := Hurst(upseries)
+	h := ConcurrentHurst(upseries)
 	if h != 1.0 {
 		t.Errorf("Expecting 1.0 got %f\n", h)
 	}

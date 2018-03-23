@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"sync"
 
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/stat"
@@ -21,18 +22,18 @@ func CumDev(values []float64, mean float64) []float64 {
 func Range(values []float64) float64 {
 	mean, stddev := stat.MeanStdDev(values, nil)
 	deviations := CumDev(values, mean)
-	return math.Log2((floats.Max(deviations) - floats.Min(deviations)) / stddev)
+	return math.Log10((floats.Max(deviations) - floats.Min(deviations)) / stddev)
 }
 
 //Hurst returns the Hurst Exponent for a given series
 func Hurst(values []float64) float64 {
 	l := len(values)
-	var y = make([]float64, l-2)
-	var x = make([]float64, l-2)
+	var y []float64
+	var x []float64
 
 	for i := 2; i < l; i++ {
 		y = append(y, Range(values[0:i]))
-		x = append(x, math.Log2(float64(i)))
+		x = append(x, math.Log10(float64(i)))
 	}
 
 	h, _ := OLS(x, y)
@@ -40,43 +41,50 @@ func Hurst(values []float64) float64 {
 	return math.Abs(h)
 }
 
-//Split separates the values into "almost" equal parts
-// func Split(values []float64, parts int) ([][]float64, error) {
-// 	var s, e, l, k int
-// 	var res [][]float64
-// 	l = len(values)
-// 	if l < parts {
-// 		return nil, errors.New("unable to split the values, number of parts greater then length of the items")
-// 	}
+//ConcurrentHurst returns the Hurst Exponent for a given series using concurrency
+func ConcurrentHurst(values []float64) float64 {
+	l := len(values)
+	var y = make([]float64, l-2)
+	var x = make([]float64, l-2)
 
-// 	//fmt.Fprintf(os.Stderr, "Split %d elements into %d parts\n", len(values), parts)
-// 	e = l / parts
-// 	res = make([][]float64, parts)
-// 	k = e
-// 	for i := 0; i < parts-1; i++ {
-// 		//fmt.Fprintf(os.Stderr, "%d -> %d:%d\n", i, s, k)
-// 		res[i] = values[s:k]
-// 		s = k
-// 		k += e
-// 	}
+	var wg sync.WaitGroup
+	var workers = int(math.Min(float64(l-2), 80))
 
-// 	res[parts-1] = values[s:]
-// 	return res, nil
-// }
+	type round struct {
+		i      int
+		values []float64
+	}
 
-// //Partition splits the slice of floats for post processing
-// //The logic splits the data into nearly equal len(values)/2 groups
-// func Partition(values []float64) ([][][]float64, error) {
-// 	var res [][][]float64
-// 	var err error
-// 	divisions := len(values)
+	ichan := make(chan round, 100)
+	quit := make(chan int)
 
-// 	res = make([][][]float64, divisions)
-// 	for i := 1; i <= divisions; i++ {
-// 		res[i-1], err = Split(values, i)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 	}
-// 	return res, nil
-// }
+	for i := 0; i < workers; i++ {
+		go func() {
+			for {
+				select {
+				case round := <-ichan:
+					y[round.i] = Range(round.values)
+					wg.Done()
+				case <-quit:
+					return
+				}
+			}
+		}()
+	}
+
+	j := 2
+	wg.Add(l - 2)
+	for i := 0; i < l-2; i++ {
+		ichan <- round{i: i, values: values[0:j]}
+		x[i] = math.Log10(float64(j))
+		j++
+	}
+	wg.Wait()
+	for i := 0; i < workers; i++ {
+		quit <- 0
+	}
+
+	h, _ := OLS(x, y)
+
+	return math.Abs(h)
+}
